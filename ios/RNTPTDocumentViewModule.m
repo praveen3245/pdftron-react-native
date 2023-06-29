@@ -295,6 +295,21 @@ RCT_REMAP_METHOD(getField,
     }
 }
 
+RCT_REMAP_METHOD(compareButton,
+                 getFieldForDocumentViewTag:(nonnull NSNumber *)tag
+                 buttonState:(NSString *)buttonState
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSDictionary *field = [[self documentViewManager] getFieldForDocumentViewTag:tag buttonState:buttonState];
+        resolve(field);
+    }
+    @catch (NSException *exception) {
+        reject(@"get_field", @"Failed to get field", [self errorFromException:exception]);
+    }
+}
+
 RCT_REMAP_METHOD(openAnnotationList,
                  openAnnotationListForDocumentViewTag:(nonnull NSNumber *)tag
                  resolver:(RCTPromiseResolveBlock)resolve
