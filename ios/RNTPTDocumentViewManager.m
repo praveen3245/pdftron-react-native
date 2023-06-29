@@ -1203,6 +1203,19 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     }
 }
 
+- (NSDictionary *)getFieldForDocumentViewTag:(NSNumber *)tag buttonState:(NSString *)buttonState
+{
+    NSLog(@"Button State1 %@", buttonState);
+    self.compareOpenify = buttonState;
+    if ([self.compareOpenify isEqual:@"true"]) {
+        PTDocumentController *documentController = [[PTDocumentController alloc] init];
+        UIBarButtonItem* myItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"compare"] style:UIBarButtonItemStylePlain target:nil action:nil];
+
+        documentController.navigationItem.rightBarButtonItems = [documentController.navigationItem.rightBarButtonItems arrayByAddingObject:myItem];
+        }
+    return NULL;
+}
+
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber *)tag annotationFlagList:(NSArray *)annotationFlagList
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
