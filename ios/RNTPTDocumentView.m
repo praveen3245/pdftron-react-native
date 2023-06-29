@@ -289,7 +289,8 @@ NS_ASSUME_NONNULL_END
 
 - (void)loadViewController
 {
-    if (!self.documentViewController && !self.tabbedDocumentViewController) {
+        if (!self.documentViewController && !self.tabbedDocumentViewController) {
+        NSLog(@"Something To Print2");
         if ([self isCollabEnabled]) {
             PTExternalAnnotManagerMode collabMode = e_ptadmin_undo_own;
 
@@ -2431,6 +2432,8 @@ NS_ASSUME_NONNULL_END
             }
         } else {
             if (navImage) {
+                
+
                 [navButton setImage:navImage];
             }
         }
@@ -3721,6 +3724,19 @@ NS_ASSUME_NONNULL_END
                 PTRectHeightKey: @([pageRect Height]),
         },
     };
+}
+
+- (NSDictionary *)compareButton:(NSString *)buttonState
+{
+    NSLog(@"Button State %@", buttonState);
+    self.compareOpenify = buttonState;
+    if ([self.compareOpenify isEqual:@"true"]) {
+        PTDocumentController *documentController = [[PTDocumentController alloc] init];
+        UIBarButtonItem* myItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"compare"] style:UIBarButtonItemStylePlain target:nil action:nil];
+
+        documentController.navigationItem.rightBarButtonItems = [documentController.navigationItem.rightBarButtonItems arrayByAddingObject:myItem];
+        }
+    return NULL;
 }
 
 - (PTPDFRect*)convertScreenRectToPageRect:(PTPDFRect*)screenRect pageNumber:(int)pageNumber pdfViewCtrl:(PTPDFViewCtrl *)pdfViewCtrl
