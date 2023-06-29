@@ -10,7 +10,7 @@
 #import <React/RCTViewManager.h>
 
 @interface RNTPTDocumentViewManager : RCTViewManager <RNTPTDocumentViewDelegate>
-
+@property (nonatomic) NSString *compareOpenify;
 @property (nonatomic, strong) NSMutableDictionary<NSNumber *, RNTPTDocumentView *> *documentViews;
 
 - (void)setToolModeForDocumentViewTag:(NSNumber *)tag toolMode:(NSString *)toolMode;
@@ -42,6 +42,8 @@
 - (void)setValuesForFieldsForDocumentViewTag:(NSNumber *)tag map:(NSDictionary<NSString *, id> *)map;
 
 - (NSDictionary *)getFieldForDocumentViewTag:(NSNumber *)tag fieldName:(NSString *)fieldName;
+
+- (NSDictionary *)getFieldForDocumentViewTag:(NSNumber *)tag buttonState:(NSString *)buttonState;
 
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber*) tag annotationFlagList:(NSArray *)annotationFlagList;
 
