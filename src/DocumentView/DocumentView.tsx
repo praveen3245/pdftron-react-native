@@ -573,6 +573,15 @@ export class DocumentView extends PureComponent<DocumentViewProps, any> {
     }
     return Promise.resolve();
   }
+  
+  compareButton = (buttonState: string): Promise<void | {buttonState: string, fieldValue?: any, fieldType?: string}> => {
+    const tag = findNodeHandle(this._viewerRef);
+    if(tag != null) {
+      console.log("buttonState ::", buttonState);
+      return DocumentViewManager.compareButton(tag, buttonState);
+    }
+    return Promise.resolve();
+}
 
   openAnnotationList = (): Promise<void> => {
     const tag = findNodeHandle(this._viewerRef);
