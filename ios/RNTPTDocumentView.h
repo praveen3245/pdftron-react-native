@@ -506,7 +506,7 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 @property (nonatomic, copy, nullable) NSArray<NSString *> *topAppNavBarRightBar;
 @property (nonatomic, copy, nullable) NSArray<NSString *> *bottomToolbar;
 @property (nonatomic, copy, nullable) NSString *initialToolbar;
-
+@property (nonatomic) NSString *compareOpenify;
 @property (nonatomic) BOOL hideAnnotationToolbarSwitcher;
 @property (nonatomic) BOOL hideTopToolbars;
 @property (nonatomic) BOOL hideTopAppNavBar;
@@ -582,6 +582,8 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 - (void)setValuesForFields:(NSDictionary<NSString *, id> *)map;
 
 - (NSDictionary *)getField:(NSString *)fieldName;
+
+- (NSDictionary *)compareButton:(NSString *)buttonState;
 
 - (void)setFlagsForAnnotations:(NSArray *)annotationFlagList;
 
