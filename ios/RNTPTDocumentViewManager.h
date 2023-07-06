@@ -43,7 +43,10 @@
 
 - (NSDictionary *)getFieldForDocumentViewTag:(NSNumber *)tag fieldName:(NSString *)fieldName;
 
-- (NSDictionary *)getFieldForDocumentViewTag:(NSNumber *)tag buttonState:(NSString *)buttonState;
+- (NSDictionary *)getFieldForDocumentViewTag1:(NSNumber *)tag buttonState:(NSString *)buttonState;
+
+- (NSDictionary *)getFieldForDocumentViewTag2:(NSNumber *)tag url1:(NSString *)url1
+        url2:(NSString *)url2;
 
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber*) tag annotationFlagList:(NSArray *)annotationFlagList;
 
