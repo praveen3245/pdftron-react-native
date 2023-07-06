@@ -341,6 +341,7 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 - (void)documentViewDetachedFromWindow:(RNTPTDocumentView *)documentView;
 
 - (void)navButtonClicked:(RNTPTDocumentView *)sender;
+- (void)compareButtonPressed:(RNTPTDocumentView *)sender;
 - (void)documentLoaded:(RNTPTDocumentView *)sender;
 - (void)documentError:(RNTPTDocumentView *)sender error:(nullable NSString *)error;
 - (void)pageChanged:(RNTPTDocumentView *)sender previousPageNumber:(int)previousPageNumber;
@@ -584,6 +585,8 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 - (NSDictionary *)getField:(NSString *)fieldName;
 
 - (NSDictionary *)compareButton:(NSString *)buttonState;
+
+- (NSDictionary *)url1:(NSString *)url1 url2:(NSString *)url2;
 
 - (void)setFlagsForAnnotations:(NSArray *)annotationFlagList;
 
