@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -71,12 +72,14 @@ import com.pdftron.pdf.dialog.pdflayer.PdfLayerDialog;
 import com.pdftron.pdf.model.AnnotStyle;
 import com.pdftron.pdf.model.UserBookmarkItem;
 import com.pdftron.pdf.tools.AdvancedShapeCreate;
+import com.pdftron.pdf.tools.AnnotEditTextMarkup;
 import com.pdftron.pdf.tools.AnnotManager;
 import com.pdftron.pdf.tools.Eraser;
 import com.pdftron.pdf.tools.FreehandCreate;
 import com.pdftron.pdf.tools.Pan;
 import com.pdftron.pdf.tools.QuickMenu;
 import com.pdftron.pdf.tools.QuickMenuItem;
+import com.pdftron.pdf.tools.RubberStampCreate;
 import com.pdftron.pdf.tools.TextSelect;
 import com.pdftron.pdf.tools.Tool;
 import com.pdftron.pdf.tools.ToolManager;
@@ -137,6 +140,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     private ViewerConfig.Builder mBuilder;
 
     private ArrayList<ToolManager.ToolMode> mDisabledTools = new ArrayList<>();
+    private ArrayList<ToolbarButtonType> mDisabledButtonTypes = new ArrayList<>(); // used to disabled button types that are with specific a with explicit tool type (e.g. checkmark, dot, cross stamps)
 
     private String mExportPath;
     private String mOpenUrlPath;
@@ -148,6 +152,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
     private boolean mUseStylusAsPen = true;
     private boolean mSignWithStamps;
+
+    private boolean mEnableReadingModeQuickMenu = true;
 
     public boolean isBookmarkListVisible = true;
     public boolean isOutlineListVisible = true;
@@ -769,6 +775,10 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     }
 
     // Hygen Generated Props
+    public void setEnableReadingModeQuickMenu(boolean enabled) {
+        mEnableReadingModeQuickMenu = enabled;
+    }
+
     public void setForceAppTheme(String forcedAppThemeItems) {
         if (THEME_DARK.equals(forcedAppThemeItems)) {
             PdfViewCtrlSettingsManager.setColorMode(getContext(), PdfViewCtrlSettingsManager.KEY_PREF_COLOR_MODE_NIGHT);
@@ -1217,6 +1227,9 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             ToolManager.ToolMode mode = convStringToToolMode(item);
             if (mode != null) {
                 mDisabledTools.add(mode);
+            } else { // if there is no tool associated, then disable the button type instead
+                ToolbarButtonType buttonType = convStringToToolbarType(item);
+                mDisabledButtonTypes.add(buttonType);
             }
         }
     }
@@ -1264,6 +1277,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_PERIMETER_MEASURE;
         } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_AREA_MEASURE;
+        } else if (TOOL_ANNOTATION_CREATE_RECT_AREA_MEASUREMENT.equals(item)) {
+            annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_RECT_AREA_MEASURE;
         } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             annotType = Annot.e_FileAttachment;
         } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
@@ -1301,6 +1316,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_COUNT_MEASUREMENT;
         } else if (TOOL_ANNOTATION_CREATE_FREE_TEXT_DATE.equals(item)) {
             annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_FREE_TEXT_DATE;
+        } else if (TOOL_ANNOTATION_CREATE_CHECK_MARK_STAMP.equals(item)) {
+            annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_CHECKMARK_STAMP;
+        } else if (TOOL_ANNOTATION_CREATE_CROSS_MARK_STAMP.equals(item)) {
+            annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_CROSS_STAMP;
+        } else if (TOOL_ANNOTATION_CREATE_DOT_STAMP.equals(item)) {
+            annotType = AnnotStyle.CUSTOM_ANNOT_TYPE_DOT_STAMP;
         }
         return annotType;
     }
@@ -1387,6 +1408,15 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             case AnnotStyle.CUSTOM_ANNOT_TYPE_FREE_TEXT_DATE:
                 annotString = TOOL_ANNOTATION_CREATE_FREE_TEXT_DATE;
                 break;
+            case AnnotStyle.CUSTOM_ANNOT_TYPE_CHECKMARK_STAMP:
+                annotString = TOOL_ANNOTATION_CREATE_CHECK_MARK_STAMP;
+                break;
+            case AnnotStyle.CUSTOM_ANNOT_TYPE_CROSS_STAMP:
+                annotString = TOOL_ANNOTATION_CREATE_CROSS_MARK_STAMP;
+                break;
+            case AnnotStyle.CUSTOM_ANNOT_TYPE_DOT_STAMP:
+                annotString = TOOL_ANNOTATION_CREATE_DOT_STAMP;
+                break;
             default:
                 annotString = "";
                 break;
@@ -1463,6 +1493,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             mode = ToolManager.ToolMode.PERIMETER_MEASURE_CREATE;
         } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             mode = ToolManager.ToolMode.AREA_MEASURE_CREATE;
+        } else if (TOOL_ANNOTATION_CREATE_RECT_AREA_MEASUREMENT.equals(item)) {
+            mode = ToolManager.ToolMode.RECT_AREA_MEASURE_CREATE;
         } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             mode = ToolManager.ToolMode.FILE_ATTACHMENT_CREATE;
         } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
@@ -1507,6 +1539,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             mode = ToolManager.ToolMode.COUNT_MEASUREMENT;
         } else if (TOOL_ANNOTATION_CREATE_FREE_TEXT_DATE.equals(item)) {
             mode = ToolManager.ToolMode.FREE_TEXT_DATE_CREATE;
+        } else if (TOOL_ANNOTATION_CREATE_CHECK_MARK_STAMP.equals(item)) {
+            mode = ToolManager.ToolMode.RUBBER_STAMPER;
+        } else if (TOOL_ANNOTATION_CREATE_CROSS_MARK_STAMP.equals(item)) {
+            mode = ToolManager.ToolMode.RUBBER_STAMPER;
+        } else if (TOOL_ANNOTATION_CREATE_DOT_STAMP.equals(item)) {
+            mode = ToolManager.ToolMode.RUBBER_STAMPER;
         }
         return mode;
     }
@@ -1697,6 +1735,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             buttonId = DefaultToolbars.ButtonId.PERIMETER.value();
         } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             buttonId = DefaultToolbars.ButtonId.AREA.value();
+        } else if (TOOL_ANNOTATION_CREATE_RECT_AREA_MEASUREMENT.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.RECT_AREA.value();
         } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             buttonId = DefaultToolbars.ButtonId.ATTACHMENT.value();
         } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
@@ -1735,6 +1775,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             buttonId = DefaultToolbars.ButtonId.CUSTOMIZE.value();
         } else if (TOOL_ANNOTATION_CREATE_FREE_TEXT_DATE.equals(item)) {
             buttonId = DefaultToolbars.ButtonId.DATE.value();
+        } else if (TOOL_ANNOTATION_CREATE_CHECK_MARK_STAMP.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.CHECKMARK.value();
+        } else if (TOOL_ANNOTATION_CREATE_CROSS_MARK_STAMP.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.CROSS.value();
+        } else if (TOOL_ANNOTATION_CREATE_DOT_STAMP.equals(item)) {
+            buttonId = DefaultToolbars.ButtonId.DOT.value();
         }
         return buttonId;
     }
@@ -1858,6 +1904,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             buttonType = ToolbarButtonType.PERIMETER;
         } else if (TOOL_ANNOTATION_CREATE_AREA_MEASUREMENT.equals(item)) {
             buttonType = ToolbarButtonType.AREA;
+        } else if (TOOL_ANNOTATION_CREATE_RECT_AREA_MEASUREMENT.equals(item)) {
+            buttonType = ToolbarButtonType.RECT_AREA;
         } else if (TOOL_ANNOTATION_CREATE_FILE_ATTACHMENT.equals(item)) {
             buttonType = ToolbarButtonType.ATTACHMENT;
         } else if (TOOL_ANNOTATION_CREATE_SOUND.equals(item)) {
@@ -1896,6 +1944,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             buttonType = ToolbarButtonType.EDIT_TOOLBAR;
         } else if (TOOL_ANNOTATION_CREATE_FREE_TEXT_DATE.equals(item)) {
             buttonType = ToolbarButtonType.DATE;
+        } else if (TOOL_ANNOTATION_CREATE_CHECK_MARK_STAMP.equals(item)) {
+            buttonType = ToolbarButtonType.CHECKMARK;
+        } else if (TOOL_ANNOTATION_CREATE_CROSS_MARK_STAMP.equals(item)) {
+            buttonType = ToolbarButtonType.CROSS;
+        } else if (TOOL_ANNOTATION_CREATE_DOT_STAMP.equals(item)) {
+            buttonType = ToolbarButtonType.DOT;
         }
         return buttonType;
     }
@@ -2165,7 +2219,41 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
     @Override
     protected void prepView() {
-        super.prepView();
+        // Create a viewer builder with the specified parameters
+        buildViewer();
+        if (mViewerBuilder == null) {
+            return;
+        }
+
+        Context context = getContext();
+        Activity activity = null;
+        if (context instanceof ThemedReactContext) {
+            activity = ((ThemedReactContext) context).getCurrentActivity();
+        }
+        if (activity instanceof AppCompatActivity) {
+            if (activity.isFinishing() || !((AppCompatActivity) activity).getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+                return;
+            }
+        }
+
+        if (mPdfViewCtrlTabHostFragment != null) {
+            mPdfViewCtrlTabHostFragment.onOpenAddNewTab(mViewerBuilder.createBundle(getContext()));
+        } else {
+            mPdfViewCtrlTabHostFragment = getViewer();
+            mPdfViewCtrlTabHostFragment.addHostListener(this);
+
+            if (mFragmentManager != null) {
+                mFragmentManager.beginTransaction()
+                        .add(mPdfViewCtrlTabHostFragment, String.valueOf(getId()))
+                        .commitNowAllowingStateLoss();
+
+                View fragmentView = mPdfViewCtrlTabHostFragment.getView();
+                if (fragmentView != null) {
+                    fragmentView.clearFocus(); // work around issue where somehow new ui obtains focus
+                    addView(fragmentView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+                }
+            }
+        }
 
         if (mPdfViewCtrlTabHostFragment != null && mPdfViewCtrlTabHostFragment.getView() == null) {
             if (mPdfViewCtrlTabHostFragment instanceof RNPdfViewCtrlTabHostFragment) {
@@ -2501,7 +2589,8 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
             // remove unwanted items
             ToolManager.Tool currentTool = getToolManager() != null ? getToolManager().getTool() : null;
-            if (mAnnotMenuItems != null && !(currentTool instanceof Pan) && !(currentTool instanceof TextSelect)) {
+            boolean isPanOrTextSelect = (currentTool instanceof Pan || (currentTool instanceof TextSelect && !(currentTool instanceof AnnotEditTextMarkup)));
+            if (mAnnotMenuItems != null && !isPanOrTextSelect) {
                 List<QuickMenuItem> removeList = new ArrayList<>();
                 checkQuickMenu(quickMenu.getFirstRowMenuItems(), mAnnotMenuItems, removeList);
                 checkQuickMenu(quickMenu.getSecondRowMenuItems(), mAnnotMenuItems, removeList);
@@ -2512,7 +2601,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
                     quickMenu.setDividerVisibility(View.GONE);
                 }
             }
-            if (mLongPressMenuItems != null && (currentTool instanceof Pan || currentTool instanceof TextSelect)) {
+            if (mLongPressMenuItems != null && isPanOrTextSelect) {
                 List<QuickMenuItem> removeList = new ArrayList<>();
                 checkQuickMenu(quickMenu.getFirstRowMenuItems(), mLongPressMenuItems, removeList);
                 checkQuickMenu(quickMenu.getSecondRowMenuItems(), mLongPressMenuItems, removeList);
@@ -2830,6 +2919,11 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
         }
 
         @Override
+        public void onPagesMoved(List<Integer> pagesMoved, int to, int currentPage) {
+
+        }
+
+        @Override
         public void onPageLabelsChanged() {
 
         }
@@ -3046,9 +3140,19 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             fragment.setReactContext((ReactContext) getContext(), getId());
         }
 
+        if (getPdfViewCtrl() == null || getToolManager() == null) {
+            return;
+        }
+
         // Hide add page annotation toolbar button
         if (!mShowAddPageToolbarButton) {
             mPdfViewCtrlTabHostFragment.toolbarButtonVisibility(ToolbarButtonType.ADD_PAGE, false);
+        }
+
+        if (!mDisabledButtonTypes.isEmpty()) {
+            for (ToolbarButtonType disabledButtonType : mDisabledButtonTypes) {
+                mPdfViewCtrlTabHostFragment.toolbarButtonVisibility(disabledButtonType, false);
+            }
         }
 
         if (!mCollabEnabled && getToolManager() != null) {
@@ -3091,6 +3195,7 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
 
         getToolManager().setStylusAsPen(mUseStylusAsPen);
         getToolManager().setSignSignatureFieldsWithStamps(mSignWithStamps);
+        getToolManager().setReflowTextSelectionMenuEnabled(mEnableReadingModeQuickMenu);
 
         getToolManager().getUndoRedoManger().addUndoRedoStateChangeListener(mUndoRedoStateChangedListener);
 
@@ -3960,9 +4065,26 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     public void setToolMode(String item) {
         if (getToolManager() != null) {
             ToolManager.ToolMode mode = convStringToToolMode(item);
+            ToolbarButtonType buttonType = convStringToToolbarType(item);
+
             Tool tool = (Tool) getToolManager().createTool(mode, null);
             boolean continuousAnnot = PdfViewCtrlSettingsManager.getContinuousAnnotationEdit(getContext());
             tool.setForceSameNextToolMode(continuousAnnot);
+            if (buttonType != null && mode == ToolManager.ToolMode.RUBBER_STAMPER && tool instanceof RubberStampCreate) { // check whether dot, checkmark, or cross
+                RubberStampCreate rubberStampCreateTool = (RubberStampCreate) tool;
+                switch (buttonType) {
+                    case DOT:
+                        rubberStampCreateTool.setStampName(RubberStampCreate.sDOT_LABEL);
+                        break;
+                    case CROSS:
+                        rubberStampCreateTool.setStampName(RubberStampCreate.sCROSS_LABEL);
+                        break;
+                    case CHECKMARK:
+                        rubberStampCreateTool.setStampName(RubberStampCreate.sCHECK_MARK_LABEL);
+                        break;
+                }
+            }
+
             getToolManager().setTool(tool);
         }
     }

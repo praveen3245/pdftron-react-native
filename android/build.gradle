@@ -1,6 +1,6 @@
 
 buildscript {
-    def kotlinVersion = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : "1.6.20"
+    def kotlinVersion = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : "1.8.22"
     repositories {
         google()
         mavenCentral()
@@ -24,7 +24,6 @@ rootProject.allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
@@ -65,10 +64,10 @@ dependencies {
 
     implementation 'androidx.fragment:fragment:1.2.1'
 
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     
-    implementation "com.pdftron:pdftron:10.2.0"
-    implementation "com.pdftron:tools:10.2.0"
-    implementation "com.pdftron:collab:10.2.0"
+    implementation "com.pdftron:pdftron:10.7.0"
+    implementation "com.pdftron:tools:10.7.0"
+    implementation "com.pdftron:collab:10.7.0"
 }
