@@ -204,8 +204,10 @@ NS_ASSUME_NONNULL_END
     if (self.window) {
         if ([self.delegate respondsToSelector:@selector(documentViewAttachedToWindow:)]) {
             [self.delegate documentViewAttachedToWindow:self];
+             // not working pj changing default color for markup tools
+            [PTColorDefaults setDefaultColor:[UIColor blueColor] forAnnotType:PTExtendedAnnotTypeHighlight attribute:ATTRIBUTE_STROKE_COLOR colorPostProcessMode:e_ptpostprocess_none];
         }
-        
+            
         [self loadViewController];
     } else {
         if ([self.delegate respondsToSelector:@selector(documentViewDetachedFromWindow:)]) {
@@ -1158,7 +1160,7 @@ NS_ASSUME_NONNULL_END
         
         if ([tool isKindOfClass:[PTFreeHandCreate class]]
             && ![tool isKindOfClass:[PTFreeHandHighlightCreate class]]) {
-            ((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
+            //((PTFreeHandCreate *)tool).multistrokeMode = self.continuousAnnotationEditing;
         }
     }
 }
