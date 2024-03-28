@@ -302,7 +302,7 @@ RCT_REMAP_METHOD(compareButton,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        NSDictionary *field = [[self documentViewManager] getFieldForDocumentViewTag:tag buttonState:buttonState];
+        NSDictionary *field = [[self documentViewManager] getFieldForDocumentViewTag1:tag buttonState:buttonState];
         resolve(field);
     }
     @catch (NSException *exception) {
