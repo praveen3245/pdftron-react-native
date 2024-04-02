@@ -589,6 +589,8 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 
 - (NSDictionary *)compareButton:(NSString *)buttonState;
 
+- (NSString *)textSearchInPdfContent:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm;
+
 - (NSDictionary *)url1:(NSString *)url1 url2:(NSString *)url2;
 
 - (void)setFlagsForAnnotations:(NSArray *)annotationFlagList;

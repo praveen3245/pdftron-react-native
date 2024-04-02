@@ -1775,6 +1775,42 @@ NS_ASSUME_NONNULL_END
     return [[fieldMap allKeys] count] == 0 ? nil : fieldMap;
 }
 
+- (NSString *)textSearchInPdfContent:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm
+{
+    [PTPDFNet Initialize: 0];
+    NSLog(@"documentfound11 %@", fileUrl);
+    NSLog(@"searchTerm %@", searchTerm);
+    NSData *pdfData = [NSData dataWithContentsOfURL:fileUrl];
+    NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"temp.pdf"];
+
+    // Write downloaded data to a temporary file
+    [pdfData writeToFile:tempPath atomically:YES];
+    PTPDFDoc *doc = [[PTPDFDoc alloc] initWithFilepath: tempPath];
+    NSLog(@"documentfound %@", doc);
+    [doc InitSecurityHandler];
+    PTTextSearch *txt_search = [[PTTextSearch alloc] init];
+    unsigned int mode = e_ptreg_expression | e_pthighlight;
+    NSString *pattern = searchTerm;
+    [txt_search Begin: doc pattern: pattern mode: mode start_page: -1 end_page: -1];
+    PTSearchResult *result = [txt_search Run];
+    while ( YES )
+    {
+        if ( result )
+        {
+            if([result GetMatch]){
+            NSLog(@"\nThere is an AMEX card number:\n %@", [result GetMatch]);
+            [[NSFileManager defaultManager] removeItemAtPath:tempPath error:nil];
+            return @"true";
+        }else{
+            NSLog(@"\nThere is no AMEX card number:\n %@", [result GetMatch]);
+            [[NSFileManager defaultManager] removeItemAtPath:tempPath error:nil];
+            return @"false";
+        }
+        }
+    }
+    return NULL;
+}
+
 - (NSDictionary *)getFieldWithHasAppearance:(PTAnnot *)annot
 {
     __block PTWidget *widget;

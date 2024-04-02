@@ -310,6 +310,22 @@ RCT_REMAP_METHOD(compareButton,
     }
 }
 
+RCT_REMAP_METHOD(textSearchInPdfContent,
+                 getFieldForDocumentViewTag3:(nonnull NSNumber *)tag
+                 fileUrl:(NSURL *)fileUrl
+                 searchTerm: (NSString *)searchTerm
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSString *field = [[self documentViewManager] getFieldForDocumentViewTag3:tag fileUrl:fileUrl searchTerm: searchTerm];
+        resolve(field);
+    }
+    @catch (NSException *exception) {
+        reject(@"set_value_for_fields", @"Failed to set value on fields", [self errorFromException:exception]);
+    }
+}
+
 RCT_REMAP_METHOD(openAnnotationList,
                  openAnnotationListForDocumentViewTag:(nonnull NSNumber *)tag
                  resolver:(RCTPromiseResolveBlock)resolve

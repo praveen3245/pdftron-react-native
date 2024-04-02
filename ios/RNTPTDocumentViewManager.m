@@ -1251,6 +1251,17 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     return NULL;
 }
 
+- (NSString *)getFieldForDocumentViewTag3:(NSNumber *)tag fileUrl:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView textSearchInPdfContent:fileUrl searchTerm: searchTerm];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+        return nil;
+    }
+}
+
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber *)tag annotationFlagList:(NSArray *)annotationFlagList
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
