@@ -140,6 +140,16 @@ NS_ASSUME_NONNULL_END
 
 - (BOOL)toolManager:(PTToolManager *)toolManager shouldShowMenu:(UIMenuController *)menuController forAnnotation:(PTAnnot *)annotation onPageNumber:(unsigned long)pageNumber
 {
+    if ([toolManager.tool isKindOfClass:[PTAnnotEditTool class]]) {
+           // Remove the annotation creation menu items.
+        [menuController setMenuItems:[self removeAnnotationItems:menuController.menuItems]];
+        [menuController setMenuItems:[self addAnnotationItems:menuController.menuItems withAccess:(PTAnnot *)annotation]];
+        [menuController setMenuItems:[self updateAnnotationItems:menuController.menuItems]];
+        NSLog(@"select annotation call4%@",menuController.menuItems);
+        
+           //return YES;
+       }
+    
     BOOL result = [super toolManager:toolManager shouldShowMenu:menuController forAnnotation:annotation onPageNumber:pageNumber];
     if (!result) {
         return NO;
@@ -163,6 +173,73 @@ NS_ASSUME_NONNULL_END
     }
     
     return showMenu;
+}
+
+- (NSArray<UIMenuItem *> *)updateAnnotationItems:(NSArray<UIMenuItem *> *)items {
+    NSMutableArray<UIMenuItem *> *updatedItems = [items mutableCopy];
+    
+    // Define the title of the menu item you want to change.
+    NSString *itemToChangeTitle = PTLocalizedString(@"Style", nil);
+    // Define the new title for the menu item.
+    NSString *newItemTitle = @"Edit";
+    
+    // Find the index of the menu item with the specified title.
+    NSUInteger index = [updatedItems indexOfObjectPassingTest:^BOOL(UIMenuItem *menuItem, NSUInteger idx, BOOL *stop) {
+        return [menuItem.title isEqualToString:itemToChangeTitle];
+    }];
+    
+    // Check if the menu item was found.
+    if (index != NSNotFound) {
+        // Update the title of the menu item.
+        UIMenuItem *menuItem = updatedItems[index];
+        menuItem.title = newItemTitle;
+        [updatedItems replaceObjectAtIndex:index withObject:menuItem];
+    }
+    
+    return [updatedItems copy];
+}
+
+- (NSArray<UIMenuItem *> *)removeAnnotationItems:(NSArray<UIMenuItem *> *)items {
+    NSLog(@"removeAnnotation call");
+    NSArray<NSString *> *stringsToRemove = @[
+        PTLocalizedString(@"Note", nil),
+        PTLocalizedString(@"Flatten", nil),
+        PTLocalizedString(@"Duplicate", nil),
+        PTLocalizedString(@"Copy", nil),
+        PTLocalizedString(@"Edit", nil)
+    ];
+    
+    // Filter out menu items with titles matching specified strings.
+    return [items objectsAtIndexes:[items indexesOfObjectsPassingTest:^BOOL(UIMenuItem *menuItem, NSUInteger idx, BOOL *stop) {
+        return ![stringsToRemove containsObject:menuItem.title];
+    }]];
+}
+
+
+
+- (void) handleSetAnnotationAccess:(void(^)(void))handler {
+    PTAnnot* annotation = self.toolManager.tool.currentAnnotation;
+    NSString *annotationAccess = [annotation GetCustomData:@"access"];
+    NSLog(@"handle 1 %@", annotationAccess);
+}
+
+- (void) handleSetAnnotationAccess2:(void(^)(void))handler {
+    NSLog(@"handle 2");
+}
+
+- (NSArray<UIMenuItem *> *)addAnnotationItems:(NSArray<UIMenuItem *> *)items withAccess:(PTAnnot *)annotation {
+    NSMutableArray<UIMenuItem *> *newItems = [items mutableCopy];
+    NSString *annotationAccess = [annotation GetCustomData:@"access"];
+    // Add new menu items to the popup based on the access.
+    if ([annotationAccess isEqualToString:@"private"]) {
+        UIMenuItem *publicMenuItem = [[UIMenuItem alloc] initWithTitle:@"Make Public" action:@selector(handleSetAnnotationAccess:)];
+                [newItems insertObject:publicMenuItem atIndex:1]; // Insert at index 1
+    } else if ([annotationAccess isEqualToString:@"public"]) {
+        UIMenuItem *privateMenuItem = [[UIMenuItem alloc] initWithTitle:@"Set Private" action:@selector(handleSetAnnotationAccess2:)];
+                [newItems insertObject:privateMenuItem atIndex:1]; // Insert at index 1
+    }
+    
+    return [newItems copy];
 }
 
 - (BOOL)toolManager:(PTToolManager *)toolManager shouldHandleLinkAnnotation:(PTAnnot *)annotation orLinkInfo:(PTLinkInfo *)linkInfo onPageNumber:(unsigned long)pageNumber
