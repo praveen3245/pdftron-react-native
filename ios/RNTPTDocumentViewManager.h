@@ -50,6 +50,8 @@
 
 - (NSString *)getFieldForDocumentViewTag3:(NSNumber *)tag fileUrl:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm;
 
+- (NSString *)getFieldForDocumentViewTag4:(NSNumber *)tag fileUrl1:(NSURL *)fileUrl1 fileUrl2:(NSURL *)fileUrl2;
+
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber*) tag annotationFlagList:(NSArray *)annotationFlagList;
 
 - (void)selectAnnotationForDocumentViewTag:(NSNumber *)tag annotationId:(NSString *)annotationId pageNumber:(NSInteger)pageNumber;

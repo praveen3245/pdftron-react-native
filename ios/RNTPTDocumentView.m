@@ -1811,6 +1811,71 @@ NS_ASSUME_NONNULL_END
     return NULL;
 }
 
+- (NSString *)compareTwoDocument:(NSURL *)fileUrl1 fileUrl2:(NSURL *)fileUrl2 {
+    NSLog(@"fileUrl1 %@", fileUrl1);
+    NSLog(@"fileUrl2 %@", fileUrl2);
+    
+    NSData *pdfData = [NSData dataWithContentsOfURL:fileUrl1];
+    NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"temp.pdf"];
+
+    // Write downloaded data to a temporary file
+    [pdfData writeToFile:tempPath atomically:YES];
+    NSData *pdfData1 = [NSData dataWithContentsOfURL:fileUrl2];
+    NSString *tempPath1 = [NSTemporaryDirectory() stringByAppendingPathComponent:@"temp1.pdf"];
+
+    // Write downloaded data to a temporary file
+    [pdfData1 writeToFile:tempPath1 atomically:YES];
+    // Load PDF documents
+    PTPDFDoc *docA = [[PTPDFDoc alloc] initWithFilepath:tempPath];
+    [docA InitSecurityHandler];
+    NSLog(@"docA1 :: %@", docA);
+    PTPDFDoc *docB = [[PTPDFDoc alloc] initWithFilepath:tempPath1];
+    [docB InitSecurityHandler];
+    NSLog(@"docB1 :: %@", docB);
+    PTColorPt *colorA = [[PTColorPt alloc] initWithX: 1 y: 0 z: 0 w: 0];
+    
+    PTColorPt *colorB = [[PTColorPt alloc] initWithX: 0 y: 0 z: 1 w: 0];
+    
+    PTBlendMode blendMode = e_ptbl_difference; // Set your blend mode
+    NSLog(@"blendMode1 %u", blendMode);
+    // Compare documents
+    PTPDFDoc *comparedDoc = [self pdfCompareDoc:docA withDoc:docB colorA:colorA colorB:colorB blendMode:blendMode];
+    
+    NSLog(@"comparedDoc %@", comparedDoc);
+    
+    // Save the compared document or perform further actions as needed
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *comparedDocFilename = @"compared_document.pdf";
+    NSString *comparedDocPath = [tempDir stringByAppendingPathComponent:comparedDocFilename];
+    [comparedDoc SaveToFile:comparedDocPath flags:e_ptremove_unused];
+
+    // Release resources
+    [docA Close];
+    [docB Close];
+    [comparedDoc Close];
+    NSLog(@"comparedDocPath %@", comparedDocPath);
+    return comparedDocPath;
+}
+
+- (PTPDFDoc*)pdfCompareDoc:(PTPDFDoc*)docA withDoc:(PTPDFDoc*)docB colorA:(PTColorPt*)colorA colorB:(PTColorPt*)colorB blendMode:(PTBlendMode)blendMode
+{
+    NSLog(@"docA :: %@", docA);
+    NSLog(@"docB :: %@", docB);
+    NSLog(@"blendMode :: %u", blendMode);
+    PTPage *pageA = [docA GetPage:1];
+    PTPage *pageB = [docB GetPage:1];
+
+    PTDiffOptions *diffOptions = [[PTDiffOptions alloc] init];
+    [diffOptions SetColorA:colorA];
+    [diffOptions SetColorB:colorB];
+    [diffOptions SetBlendMode:blendMode];
+
+    PTPDFDoc *doc = [[PTPDFDoc alloc] init];
+    [doc AppendVisualDiff:pageA p2:pageB opts:diffOptions];
+    NSLog(@"doc :: %@", doc);
+    return doc;
+}
+
 - (NSDictionary *)getFieldWithHasAppearance:(PTAnnot *)annot
 {
     __block PTWidget *widget;

@@ -1262,6 +1262,17 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     }
 }
 
+- (NSString *)getFieldForDocumentViewTag4:(NSNumber *)tag fileUrl1:(NSURL *)fileUrl1 fileUrl2:(NSURL *)fileUrl2
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView compareTwoDocument:fileUrl1 fileUrl2: fileUrl2];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+        return nil;
+    }
+}
+
 - (void)setFlagsForAnnotationsForDocumentViewTag:(NSNumber *)tag annotationFlagList:(NSArray *)annotationFlagList
 {
     RNTPTDocumentView *documentView = self.documentViews[tag];
