@@ -145,6 +145,7 @@ NS_ASSUME_NONNULL_END
 {
     if ([toolManager.tool isKindOfClass:[PTAnnotEditTool class]]) {
            // Remove the annotation creation menu items.
+        menuController.menuItems = menuController.menuItems;
         [menuController setMenuItems:[self removeAnnotationMenuItems:menuController.menuItems]];
         [menuController setMenuItems:[self addAnnotationMenuItems:menuController.menuItems withAccess:(PTAnnot *)annotation]];
         [menuController setMenuItems:[self updateAnnotationMenuItems:menuController.menuItems]];
@@ -209,7 +210,9 @@ NS_ASSUME_NONNULL_END
         PTLocalizedString(@"Flatten", nil),
         PTLocalizedString(@"Duplicate", nil),
         PTLocalizedString(@"Copy", nil),
-        PTLocalizedString(@"Edit", nil)
+        PTLocalizedString(@"Edit", nil),
+        PTLocalizedString(@"Make Public", nil),
+        PTLocalizedString(@"Set Private", nil),
     ];
     
     // Filter out menu items with titles matching specified strings.
@@ -238,13 +241,26 @@ NS_ASSUME_NONNULL_END
     NSMutableArray<UIMenuItem *> *newItems = [items mutableCopy];
     NSString *annotationAccess = [annotation GetCustomData:@"access"];
     // Add new menu items to the popup based on the access.
-    if ([annotationAccess isEqualToString:@"private"]) {
-        UIMenuItem *publicMenuItem = [[UIMenuItem alloc] initWithTitle:@"Make Public" action:@selector(handleSetAnnotationAccess:)];
-                [newItems insertObject:publicMenuItem atIndex:1]; // Insert at index 1
-    } else if ([annotationAccess isEqualToString:@"public"]) {
-        UIMenuItem *privateMenuItem = [[UIMenuItem alloc] initWithTitle:@"Set Private" action:@selector(handleSetAnnotationAccess:)];
-                [newItems insertObject:privateMenuItem atIndex:1]; // Insert at index 1
-    }
+    BOOL publicMenuItemExists = NO;
+      BOOL privateMenuItemExists = NO;
+      
+      // Check if the menu already contains items with the titles "Make Public" and "Set Private"
+      for (UIMenuItem *item in newItems) {
+          if ([item.title isEqualToString:@"Make Public"]) {
+              publicMenuItemExists = YES;
+          } else if ([item.title isEqualToString:@"Set Private"]) {
+              privateMenuItemExists = YES;
+          }
+      }
+      
+      // Add new menu items to the popup based on the access, if they don't already exist
+      if ([annotationAccess isEqualToString:@"private"] && !publicMenuItemExists) {
+          UIMenuItem *publicMenuItem = [[UIMenuItem alloc] initWithTitle:@"Make Public" action:@selector(handleSetAnnotationAccess:)];
+          [newItems insertObject:publicMenuItem atIndex:1]; // Insert at index 1
+      } else if ([annotationAccess isEqualToString:@"public"] && !privateMenuItemExists) {
+          UIMenuItem *privateMenuItem = [[UIMenuItem alloc] initWithTitle:@"Set Private" action:@selector(handleSetAnnotationAccess:)];
+          [newItems insertObject:privateMenuItem atIndex:1]; // Insert at index 1
+      }
     
     return [newItems copy];
 }
