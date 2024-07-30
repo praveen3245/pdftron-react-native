@@ -1836,7 +1836,7 @@ NS_ASSUME_NONNULL_END
     
     PTColorPt *colorB = [[PTColorPt alloc] initWithX: 0 y: 0 z: 1 w: 0];
     
-    PTBlendMode blendMode = e_ptbl_difference; // Set your blend mode
+    PTBlendMode blendMode = e_ptbl_darken; // Set your blend mode
     NSLog(@"blendMode1 %u", blendMode);
     // Compare documents
     PTPDFDoc *comparedDoc = [self pdfCompareDoc:docA withDoc:docB colorA:colorA colorB:colorB blendMode:blendMode];
@@ -1866,8 +1866,8 @@ NS_ASSUME_NONNULL_END
     PTPage *pageB = [docB GetPage:1];
 
     PTDiffOptions *diffOptions = [[PTDiffOptions alloc] init];
-    [diffOptions SetColorA:colorA];
-    [diffOptions SetColorB:colorB];
+    //[diffOptions SetColorA:colorA];
+    //[diffOptions SetColorB:colorB];
     [diffOptions SetBlendMode:blendMode];
 
     PTPDFDoc *doc = [[PTPDFDoc alloc] init];
