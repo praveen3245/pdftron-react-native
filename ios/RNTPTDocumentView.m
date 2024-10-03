@@ -230,7 +230,8 @@ NS_ASSUME_NONNULL_END
     if (!self.documentViewController && !self.tabbedDocumentViewController) {
         return;
     }
-    
+    PTPDFViewCtrl *pdfViewCtrl = self.documentViewController.pdfViewCtrl;
+    [pdfViewCtrl SetBackgroundColor:242 g:242 b:247 a:255];
     NSURL* fileURL;
     if (![self isBase64String]) {
         fileURL = [RNTPTDocumentView PT_getFileURL:self.document];
