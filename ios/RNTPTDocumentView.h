@@ -344,6 +344,7 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 - (void)documentViewDetachedFromWindow:(RNTPTDocumentView *)documentView;
 
 - (void)navButtonClicked:(RNTPTDocumentView *)sender;
+- (void)compareButtonPressed:(RNTPTDocumentView *)sender;
 - (void)documentLoaded:(RNTPTDocumentView *)sender;
 - (void)documentError:(RNTPTDocumentView *)sender error:(nullable NSString *)error;
 - (void)pageChanged:(RNTPTDocumentView *)sender previousPageNumber:(int)previousPageNumber;
@@ -509,7 +510,7 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 @property (nonatomic, copy, nullable) NSArray<NSString *> *topAppNavBarRightBar;
 @property (nonatomic, copy, nullable) NSArray<NSString *> *bottomToolbar;
 @property (nonatomic, copy, nullable) NSString *initialToolbar;
-
+@property (nonatomic) NSString *compareOpenify;
 @property (nonatomic) BOOL hideAnnotationToolbarSwitcher;
 @property (nonatomic) BOOL hideTopToolbars;
 @property (nonatomic) BOOL hideTopAppNavBar;
@@ -585,6 +586,14 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 - (void)setValuesForFields:(NSDictionary<NSString *, id> *)map;
 
 - (NSDictionary *)getField:(NSString *)fieldName;
+
+- (NSDictionary *)compareButton:(NSString *)buttonState;
+
+- (NSString *)textSearchInPdfContent:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm;
+
+- (NSString *)compareTwoDocument:(NSURL *)fileUrl1 fileUrl2:(NSURL *)fileUrl2;
+
+- (NSDictionary *)url1:(NSString *)url1 url2:(NSString *)url2;
 
 - (void)setFlagsForAnnotations:(NSArray *)annotationFlagList;
 

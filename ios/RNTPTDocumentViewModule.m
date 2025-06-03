@@ -295,6 +295,53 @@ RCT_REMAP_METHOD(getField,
     }
 }
 
+RCT_REMAP_METHOD(compareButton,
+                 getFieldForDocumentViewTag:(nonnull NSNumber *)tag
+                 buttonState:(NSString *)buttonState
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSDictionary *field = [[self documentViewManager] getFieldForDocumentViewTag1:tag buttonState:buttonState];
+        resolve(field);
+    }
+    @catch (NSException *exception) {
+        reject(@"get_field", @"Failed to get field", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(textSearchInPdfContent,
+                 getFieldForDocumentViewTag3:(nonnull NSNumber *)tag
+                 fileUrl:(NSURL *)fileUrl
+                 searchTerm: (NSString *)searchTerm
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSString *field = [[self documentViewManager] getFieldForDocumentViewTag3:tag fileUrl:fileUrl searchTerm: searchTerm];
+        resolve(field);
+    }
+    @catch (NSException *exception) {
+        reject(@"set_value_for_fields", @"Failed to set value on fields", [self errorFromException:exception]);
+    }
+}
+
+RCT_REMAP_METHOD(compareTwoDocument,
+                 getFieldForDocumentViewTag3:(nonnull NSNumber *)tag
+                 fileUrl1:(NSURL *)fileUrl1
+                 fileUrl2:(NSURL *)fileUrl2
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    @try {
+        NSString *field = [[self documentViewManager] getFieldForDocumentViewTag4:tag fileUrl1:fileUrl1 fileUrl2: fileUrl2];
+        resolve(field);
+    }
+    @catch (NSException *exception) {
+        reject(@"set_value_for_fields", @"Failed to set value on fields", [self errorFromException:exception]);
+    }
+}
+
 RCT_REMAP_METHOD(openAnnotationList,
                  openAnnotationListForDocumentViewTag:(nonnull NSNumber *)tag
                  resolver:(RCTPromiseResolveBlock)resolve

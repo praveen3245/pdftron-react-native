@@ -111,6 +111,13 @@ NS_ASSUME_NONNULL_END
 
 - (BOOL)toolManager:(PTToolManager *)toolManager shouldShowMenu:(UIMenuController *)menuController forAnnotation:(PTAnnot *)annotation onPageNumber:(unsigned long)pageNumber
 {
+     NSLog(@"select annotation call2%@", toolManager.tool);
+    if ([toolManager.tool isKindOfClass:[PTTextSelectTool class]]) {
+           // Remove the annotation creation menu items.
+           menuController.menuItems = [self removeAnnotationItems:menuController.menuItems];
+
+           return YES;
+       }
     BOOL result = [super toolManager:toolManager shouldShowMenu:menuController forAnnotation:annotation onPageNumber:pageNumber];
     if (!result) {
         return NO;
@@ -134,6 +141,21 @@ NS_ASSUME_NONNULL_END
     }
     
     return showMenu;
+}
+
+- (NSArray<UIMenuItem *> *)removeAnnotationItems:(NSArray<UIMenuItem *> *)items {
+    NSLog(@"removeAnnotation call");
+    NSArray<NSString *> *stringsToRemove = @[
+        PTLocalizedString(@"Highlight", nil),
+        PTLocalizedString(@"Underline", nil),
+        PTLocalizedString(@"Squiggly", nil),
+        PTLocalizedString(@"Strikeout", nil)
+    ];
+    
+    // Filter out menu items with titles matching specified strings.
+    return [items objectsAtIndexes:[items indexesOfObjectsPassingTest:^BOOL(UIMenuItem *menuItem, NSUInteger idx, BOOL *stop) {
+        return ![stringsToRemove containsObject:menuItem.title];
+    }]];
 }
 
 - (BOOL)toolManager:(PTToolManager *)toolManager shouldHandleLinkAnnotation:(PTAnnot *)annotation orLinkInfo:(PTLinkInfo *)linkInfo onPageNumber:(unsigned long)pageNumber

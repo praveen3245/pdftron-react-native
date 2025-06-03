@@ -698,6 +698,18 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     }
 }
 
+- (void)compareButtonPressed: (RNTPTDocumentView *) sender
+{
+    NSLog(@"compareButtonPressed2");
+    if (sender.onChange) {
+        NSLog(@"compareButtonPressed3");
+        sender.onChange(@{
+            @"onCompareButtonPressed": @YES,
+        });
+    }
+}
+
+
 - (void)documentLoaded:(RNTPTDocumentView *)sender
 {
     if (sender.onChange) {
@@ -1197,6 +1209,64 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     RNTPTDocumentView *documentView = self.documentViews[tag];
     if (documentView) {
         return [documentView getField:fieldName];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+        return nil;
+    }
+}
+
+- (NSDictionary *)getFieldForDocumentViewTag2:(NSNumber *)tag url1:(NSString *)url1 url2:(NSString *)url2
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView url1:url1 url2:url2];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+        return nil;
+    }
+}
+
+- (NSDictionary *)getFieldForDocumentViewTag1:(NSNumber *)tag buttonState:(NSString *)buttonState
+{
+    NSLog(@"Button State1 %@", buttonState);
+    self.compareOpenify = buttonState;
+    if ([self.compareOpenify isEqual:@"true"]) {
+       /* PTDocumentController *documentController = [[PTDocumentController alloc] init];
+        
+        NSLog(@"Button State12 %@", documentController);
+      //  UIBarButtonItem* myItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"compare"] style:UIBarButtonItemStylePlain target:nil action:nil];
+        UIBarButtonItem* myItem = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"square.and.pencil"] style:UIBarButtonItemStylePlain target:nil action:nil];
+        NSLog(@"Button State3 %@", myItem);
+       // documentController.navigationItem.rightBarButtonItems = [documentController.navigationItem.rightBarButtonItems arrayByAddingObject:myItem];
+        documentController.navigationItem.rightBarButtonItems = [documentController.navigationItem.rightBarButtonItems arrayByAddingObject:myItem];
+        NSLog(@"Button State4 %@", documentController.navigationItem.rightBarButtonItems);*/
+        RNTPTDocumentView *documentView = self.documentViews[tag];
+            if (documentView) {
+                return [documentView compareButton:buttonState];
+            } else {
+                @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to get field for tag" userInfo:nil];
+                return nil;
+            }
+        }
+    return NULL;
+}
+
+- (NSString *)getFieldForDocumentViewTag3:(NSNumber *)tag fileUrl:(NSURL *)fileUrl searchTerm:(NSString *)searchTerm
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView textSearchInPdfContent:fileUrl searchTerm: searchTerm];
+    } else {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
+        return nil;
+    }
+}
+
+- (NSString *)getFieldForDocumentViewTag4:(NSNumber *)tag fileUrl1:(NSURL *)fileUrl1 fileUrl2:(NSURL *)fileUrl2
+{
+    RNTPTDocumentView *documentView = self.documentViews[tag];
+    if (documentView) {
+        return [documentView compareTwoDocument:fileUrl1 fileUrl2: fileUrl2];
     } else {
         @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Unable to find DocumentView for tag" userInfo:nil];
         return nil;
