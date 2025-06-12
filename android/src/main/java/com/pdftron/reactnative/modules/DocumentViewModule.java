@@ -3,7 +3,7 @@ package com.pdftron.reactnative.modules;
 import android.app.Activity;
 import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
-
+import android.util.Log;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -269,6 +269,33 @@ public class DocumentViewModule extends ReactContextBaseJavaModule implements Ac
                     promise.resolve(field);
                 } catch (Exception ex) {
                     promise.reject(ex);
+                }
+            }
+        });
+    }
+
+    @ReactMethod
+    public void compareTwoDocument(final int tag, final String fileUrl1, final String fileUrl2, final Promise promise) {
+        getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mDocumentViewInstance.getFieldForDocumentViewTag4(tag, fileUrl1, fileUrl2, new com.pdftron.reactnative.views.DocumentView.Callback<String>() {
+                        @Override
+                        public void onSuccess(String resultUri) {
+                            Log.d("CompareDoc", "Comparison completed. Result URI: " + resultUri);
+                            promise.resolve(resultUri);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                            Log.e("CompareDoc", "Error comparing documents", error);
+                            promise.reject("compare_error", "Failed to compare documents", error);
+                        }
+                    });
+                } catch (Exception ex) {
+                    Log.e("CompareDoc", "Exception calling getFieldForDocumentViewTag4", ex);
+                    promise.reject("set_value_for_fields", "Failed to set value on fields", ex);
                 }
             }
         });

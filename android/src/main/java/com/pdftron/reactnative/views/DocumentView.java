@@ -1,6 +1,17 @@
 package com.pdftron.reactnative.views;
 
 import android.app.Activity;
+import io.reactivex.schedulers.Schedulers;
+import android.graphics.BlendMode;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import java.util.*;
+import android.os.Environment;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.*;
+import java.net.URI;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,7 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
-
+import android.util.Log;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContext;
@@ -79,6 +90,7 @@ import com.pdftron.pdf.tools.FreehandCreate;
 import com.pdftron.pdf.tools.Pan;
 import com.pdftron.pdf.tools.QuickMenu;
 import com.pdftron.pdf.tools.QuickMenuItem;
+import com.pdftron.pdf.dialog.diffing.DiffUtils;
 import com.pdftron.pdf.tools.RubberStampCreate;
 import com.pdftron.pdf.tools.TextSelect;
 import com.pdftron.pdf.tools.Tool;
@@ -3939,6 +3951,91 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
             }
         }
         return null;
+    }
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
+    public void compareTwoDocument(String fileUrl1, String fileUrl2, Callback<String> callback) {
+        new Thread(() -> {
+            try {
+                File localFile1 = downloadFile(fileUrl1, "file1.pdf");
+                File localFile2 = downloadFile(fileUrl2, "file2.pdf");
+
+                if (localFile1 == null || localFile2 == null) {
+                    Log.e("CompareDocs", "Failed to download files");
+                    callback.onFailure(new Exception("Failed to download files"));
+                    return;
+                }
+
+                ArrayList<Uri> files = new ArrayList<>();
+                files.add(Uri.fromFile(localFile1));
+                files.add(Uri.fromFile(localFile2));
+
+                Context context = getContext();
+                File downloadDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                if (downloadDir != null && downloadDir.exists()) {
+                    File[] oldFiles = downloadDir.listFiles((dir, name) -> name.startsWith("pdf-diff"));
+                    if (oldFiles != null) {
+                        for (File f : oldFiles) {
+                            boolean deleted = f.delete();
+                            Log.d("CompareDocs", "Deleted old file: " + f.getName() + " -> " + deleted);
+                        }
+                    }
+                }
+                mDisposable.add(DiffUtils.compareFiles(context, files, Color.RED, Color.BLUE, 0)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(uri -> {
+                            Log.d("CompareDocResult", "Result URI: " + uri);
+                            callback.onSuccess(uri.toString());
+                        }, throwable -> {
+                            Log.e("CompareDocResult", "Rx Exception: ", throwable);
+                            callback.onFailure(throwable);
+                        }));
+
+            } catch (Exception e) {
+                Log.e("CompareDocs", "Exception during comparison", e);
+                callback.onFailure(e);
+            }
+        }).start();
+    }
+
+    public interface Callback<T> {
+        void onSuccess(T result);
+        void onFailure(Throwable error);
+    }
+
+    private File downloadFile(String fileUrl, String fileName) {
+        try {
+            URL url = new URL(fileUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                Log.e("DownloadFile", "Server returned HTTP " + connection.getResponseCode());
+                return null;
+            }
+
+            File outputDir = getContext().getCacheDir(); // or getExternalFilesDir()
+            File outputFile = new File(outputDir, fileName);
+
+            InputStream input = connection.getInputStream();
+            FileOutputStream output = new FileOutputStream(outputFile);
+
+            byte[] data = new byte[4096];
+            int count;
+            while ((count = input.read(data)) != -1) {
+                output.write(data, 0, count);
+            }
+
+            output.flush();
+            output.close();
+            input.close();
+
+            return outputFile;
+
+        } catch (Exception e) {
+            Log.e("DownloadFile", "Download error", e);
+            return null;
+        }
     }
 
     @Nullable

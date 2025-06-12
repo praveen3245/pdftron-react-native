@@ -703,6 +703,18 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         }
     }
 
+    public void getFieldForDocumentViewTag4(int tag, String fileUrl1, String fileUrl2, DocumentView.Callback<String> callback){
+        DocumentView documentView = mDocumentViews.get(tag);
+        if (documentView != null) {
+            documentView.compareTwoDocument(fileUrl1, fileUrl2, callback);
+        } else {
+            callback.onFailure(new Exception("Unable to find DocumentView for tag: " + tag));
+        }
+    }
+
+
+
+
     public void deleteAnnotations(int tag, ReadableArray annots) throws PDFNetException {
         DocumentView documentView = mDocumentViews.get(tag);
         if (documentView != null) {
