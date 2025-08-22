@@ -1,5 +1,5 @@
 #import "RNTPTDocumentView.h"
-
+#import "CustomCloudSquare.h"
 #import "RNTPTDocumentViewController.h"
 #import "RNTPTCollaborationDocumentController.h"
 #import "RNTPTDocumentController.h"
@@ -5491,6 +5491,16 @@ NS_ASSUME_NONNULL_END
     };
     
     return scrollPos;
+}
+
+- (void)setSelectCloudRectangleTool:(BOOL)selectCloudRectangleTool
+{
+    _selectCloudRectangleTool = selectCloudRectangleTool;
+
+    if (_selectCloudRectangleTool && self.documentViewController) {
+        PTTool *tool = [self.currentDocumentViewController.toolManager changeTool:[CustomCloudSquare class]];
+        tool.backToPanToolAfterUse = !self.continuousAnnotationEditing;
+    }
 }
 
 #pragma mark - Scrollbars

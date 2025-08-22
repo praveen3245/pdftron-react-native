@@ -679,6 +679,14 @@ RCT_CUSTOM_VIEW_PROPERTY(signatureColors, NSArray, RNTPTDocumentView)
     }
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(selectCloudRectangleTool, BOOL, RNTPTDocumentView)
+{
+    if (json) {
+        view.selectCloudRectangleTool = [RCTConvert BOOL:json];
+    }
+}
+
+
 
 - (UIView *)view
 {

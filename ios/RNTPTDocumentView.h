@@ -403,6 +403,7 @@ static NSString * const PTSignaturesManager_signatureDirectory = @"PTSignaturesM
 @property (nonatomic, copy, nullable) NSArray<NSString *> *disabledTools;
 @property (nonatomic, copy, nullable) NSArray<NSString *> *uneditableAnnotationTypes;
 
+@property (nonatomic, assign) BOOL selectCloudRectangleTool;
 
 // annotation selection menu customization
 @property (nonatomic, copy, nullable) NSArray<NSString *> *overrideAnnotationMenuBehavior;
