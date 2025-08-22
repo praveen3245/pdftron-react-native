@@ -47,6 +47,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.pdftron.collab.db.entity.AnnotationEntity;
 import com.pdftron.collab.ui.viewer.CollabManager;
 import com.pdftron.collab.ui.viewer.CollabViewerBuilder2;
+import com.pdftron.pdf.config.ViewerBuilder2;
 import com.pdftron.collab.ui.viewer.CollabViewerTabHostFragment2;
 import com.pdftron.collab.utils.Keys;
 import com.pdftron.common.PDFNetException;
@@ -119,7 +120,7 @@ import com.pdftron.reactnative.utils.DocumentViewUtilsKt;
 import com.pdftron.reactnative.utils.DownloadFileCallback;
 import com.pdftron.reactnative.utils.ReactUtils;
 import com.pdftron.sdf.Obj;
-
+import com.pdftron.reactnative.tools.CustomCloudSquare;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 
@@ -4158,10 +4159,12 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
     }
 
     public void setToolMode(String item) {
+        Log.d("PDFTRON", "setToolMode: " + item);
         if (getToolManager() != null) {
             ToolManager.ToolMode mode = convStringToToolMode(item);
             ToolbarButtonType buttonType = convStringToToolbarType(item);
-
+            Log.d("PDFTRON", "mode created: " + mode);
+            System.out.println("call");
             Tool tool = (Tool) getToolManager().createTool(mode, null);
             boolean continuousAnnot = PdfViewCtrlSettingsManager.getContinuousAnnotationEdit(getContext());
             tool.setForceSameNextToolMode(continuousAnnot);
@@ -4179,10 +4182,50 @@ public class DocumentView extends com.pdftron.pdf.controls.DocumentView2 {
                         break;
                 }
             }
-
+            System.out.println("toolw created: " + tool);
+            System.out.println("toolw mode: " + mode);
             getToolManager().setTool(tool);
         }
     }
+
+    public void setSelectCloudRectangleTool(DocumentView documentView, boolean selectCloudRectangleTool) {
+        if (selectCloudRectangleTool) {
+            Context context = getContext();
+            Log.d("PDFTRON", "context: " + context);
+            Uri fileUri = ReactUtils.getUri(getContext(), mDocumentPath, mIsBase64, mBase64Extension);
+            Log.d("PDFTRON", "fileUri: " + fileUri);
+            PdfViewCtrlTabHostFragment2 fragment = addCustomTool(context, fileUri);
+            Log.d("PDFTRON", "fragment: " + fragment.getCurrentPdfViewCtrlFragment());
+            Log.d("PDFTRON", "CustomCloudSquare.MODE: " + CustomCloudSquare.MODE);
+            ToolManager toolManager = fragment.getCurrentPdfViewCtrlFragment().getToolManager();
+            Log.d("PDFTRON", "toolManager.getTool(): " + toolManager.getTool());
+            ToolManager.Tool customTool = toolManager.createTool(CustomCloudSquare.MODE, toolManager.getTool());
+            // Then set it in ToolManager
+            Log.d("PDFTRON", "customTool: " + customTool);
+            toolManager.setTool(customTool);
+        }
+    }
+
+    public PdfViewCtrlTabHostFragment2 addCustomTool(@NonNull Context context, @NonNull Uri fileUri) {
+        // Create the ToolManagerBuilder builder and add our custom tool
+        ToolManagerBuilder toolManagerBuilder = ToolManagerBuilder
+                .from()
+                .addCustomizedTool(CustomCloudSquare.MODE, CustomCloudSquare.class);
+        // Add the ToolManagerBuilder builder to a ViewerConfig, that will
+        // be used to initialize PdfViewCtrlTabHostFragment2
+        ViewerConfig config = new ViewerConfig.Builder()
+                .toolManagerBuilder(toolManagerBuilder)
+                .multiTabEnabled(false)
+                .build();
+        // Create the custom PdfViewCtrlTabHostFragment2 using the custom ViewerConfig object
+        return ViewerBuilder2.withUri(fileUri)
+                .usingConfig(config)
+                .build(context);
+    }
+
+
+
+
 
     public boolean commitTool() {
         if (getToolManager() != null) {

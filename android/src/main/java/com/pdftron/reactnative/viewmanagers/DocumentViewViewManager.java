@@ -101,6 +101,11 @@ public class DocumentViewViewManager extends ViewGroupManager<DocumentView> {
         documentView.setDisabledTools(array);
     }
 
+    @ReactProp(name = "selectCloudRectangleTool")
+    public void setSelectCloudRectangleTool(DocumentView documentView, boolean selectCloudRectangleTool) {
+        documentView.setSelectCloudRectangleTool(documentView, selectCloudRectangleTool);
+    }
+
     @ReactProp(name = "rememberLastUsedTool")
     public void setRememberLastUsedTool(DocumentView documentView, boolean rememberLastUsedTool) {
         documentView.setRememberLastUsedTool(rememberLastUsedTool);
